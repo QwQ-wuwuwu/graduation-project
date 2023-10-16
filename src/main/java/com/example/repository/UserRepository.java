@@ -1,6 +1,6 @@
 package com.example.repository;
 
-import com.example.entity.User;
+import com.example.pojo.User;
 import org.springframework.data.jdbc.repository.query.Modifying;
 import org.springframework.data.jdbc.repository.query.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -10,25 +10,15 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface UserRepository extends CrudRepository<User,Integer> {
-    @Query("select * from user where name=:name")
-    User findByName(@Param("name") String name);
-    @Query("select * from user u where u.id=:id")
-    User findById(@Param("id") long id);
-    @Query("select * from user u where u.role=0 and u.teacher_id is null")
-    List<User> listUnSelect();
-    @Query("select * from user u where u.role=0 and u.teacher_id=:tid;")
-    List<User> listSelect(@Param("tid") long tid);
-    @Query("select u.id, u.name,u.total,u.count from user u where u.role=1")
-    List<User> listTeacher();
+public interface UserRepository extends CrudRepository<User,Long> {
+    @Query("select * from user u where u.role=:role")
+    User findByRole(@Param("role") int role);
+    @Query("select * from user u where u.number=:number and u.role=:role")
+    User findByNumber(@Param("number") String number,@Param("role") int role);
     @Modifying
-    @Query("update user u set u.password=:newPassword where u.name=:name")
-    boolean updatePassword(@Param("name") String name,@Param("newPassword") String newPassword);
+    @Query("update user set password=:password where number=:number")
+    Integer updatePassword(@Param("number") String number, @Param("password") String password);
     @Modifying
-    @Query("update user u set u.password=:newPassword where u.role = 0 or u.role = 1")
-    boolean reSetPassword(@Param("newPassword") String newPassword);
-    @Query("select * from user u where u.teacher_name is not null")
-    List<User> listStudentAndTeacher();
-    @Query("select * from user u where u.id=:id for update;")//for update是悲观锁，保证并发性
-    User findByIdForUpdate(long id);
+    @Query("update user u set u.password=:password where u.id=:uid")
+    Integer updatePasswordByUser(@Param("uid") String uid, @Param("password") String password);
 }

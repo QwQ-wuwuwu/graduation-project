@@ -1,84 +1,88 @@
 package com.example.controller;
 
-import com.example.entity.User;
-import com.example.exception.XException;
+import com.example.dto.StudentDTO;
+import com.example.pojo.Process;
+import com.example.pojo.ProcessScore;
+import com.example.pojo.Student;
+import com.example.pojo.Teacher;
+import com.example.service.StudentService;
 import com.example.service.TeacherService;
 import com.example.vo.Code;
 import com.example.vo.ResultVo;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.annotation.Id;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/teacher")//已经在拦截器实现了权限验证，所以这里的操作就不要再次进行权限验证
+@RequestMapping("/api/teacher")
 public class TeacherController {
     @Autowired
     private TeacherService teacherService;
-    //查找没有选导师的同学列表
-    @GetMapping("/students1")
-    public ResultVo listUnSelect() {
-        if (teacherService.listUnselect().size() == 0) {
-            return ResultVo.builder()
-                    .code(666)
-                    .message("全部学生都已选择导师")
-                    .build();
+    @GetMapping("/students1/{uid}") // 查看已选自己的学生
+    public ResultVo getStudents(@PathVariable("uid") String uid) {
+        List<Student> selectStudents = teacherService.getSelectStudents(uid);
+        if (selectStudents == null) {
+            return ResultVo.error(Code.ERROR,"操作失败");
         }
-        if (teacherService.listUnselect() == null) {
-            return ResultVo.builder()
-                    .code(400)
-                    .message("操作失败")
-                    .build();
+        if (selectStudents.size() == 0) {
+            return ResultVo.error(Code.SUCCESS,"该导师目前没有学生选择");
         }
-        return ResultVo.success(666, Map.of("UnSelect",teacherService.listUnselect()));
+        return ResultVo.success(Code.SUCCESS,"操作成功", Map.of("students",selectStudents));
     }
-    //查找已选某个老师的所有学生
-    @GetMapping("/students2/{tid}")//通常来说，用户使用该功能更多的是点击该老师，而不是去输入老师的名字
-    public ResultVo listSelect(@PathVariable long tid) {
-        if (teacherService.listSelect(tid) == null) {
-            return ResultVo.builder()
-                    .code(400)
-                    .message("操作失败")
-                    .build();
+    @GetMapping("/students2") // 查看所有未选学生情况
+    public ResultVo getUnSelect() {
+        List<Student> unSelect = teacherService.getUnSelect();
+        if (unSelect == null) {
+            return ResultVo.error(Code.ERROR,"操作失败");
         }
-        if (teacherService.listSelect(tid).size() == 0) {
-            return ResultVo.builder()
-                    .code(666)
-                    .message("该导师目前没有同学选择")
-                    .build();
+        if (unSelect.size() == 0) {
+            return ResultVo.success(Code.SUCCESS,"没有同学未选导师");
         }
-        return ResultVo.success(666,Map.of("select",teacherService.listSelect(tid)));
+        return ResultVo.success(Code.SUCCESS,"操作成功",Map.of("students",unSelect));
     }
-    //查找已配对的老师和同学
     @GetMapping("/students3")
-    public ResultVo listSelect() {
-        List<User> lists = teacherService.listStudentAndTeacher();
-        if (lists == null) {
-            return ResultVo.builder()
-                    .code(400)
-                    .message("操作失败")
-                    .build();
+    public ResultVo getSelect() { // 查看所有已选学生
+        List<StudentDTO> select = teacherService.getSelect();
+        if (select == null) {
+            return ResultVo.error(Code.ERROR,"操作失败");
         }
-        if (lists.size() == 0) {
-            return ResultVo.builder()
-                    .code(666)
-                    .message("目前没用配对的老师和同学")
-                    .build();
+        if (select.size() == 0) {
+            return ResultVo.success(Code.SUCCESS,"没有同学已选导师");
         }
-        return ResultVo.success(666,Map.of("TeacherAndStudent",lists));
+        return ResultVo.success(Code.SUCCESS,"操作成功",Map.of("students",select));
     }
-    //通过提供姓名和旧密码，更新密码
-    @PutMapping("/password")
-    public ResultVo updatePassword(@RequestParam("password") String password, @RequestParam("name") String name, @RequestParam("newPassword") String newPassword) {
-        boolean flag = teacherService.updatePassword(name,password,newPassword);
-        if (!flag) {
-            return ResultVo.error(Code.BAD_REQUEST,"更新失败，请重试");
+    @GetMapping("/process/{pid}/role/{role}")
+    public ResultVo listProcess(@PathVariable("pid") String pid, @PathVariable String role,
+                                @RequestAttribute("uid") String uid) {
+        Teacher teacher = teacherService.getTeacher(uid);
+        Integer groupId = teacher.getGroupId(); // 老师所在的评审小组就是学生加入的评审小组
+        if (role.equals(Process.CHECK)) { // 如果是审查老师，应该展示这个组的所有同学的过程分数
+            List<ProcessScore> processScores = teacherService.getProcessScores(groupId, pid);
+            return ResultVo.success(Code.SUCCESS,"",Map.of("processScore",processScores));
         }
-        return ResultVo.builder()
-                .code(666)
-                .message("更新成功，请妥善保存密码")
-                .build();
+        List<ProcessScore> processScores = teacherService.getProcessScores(uid, pid);
+        return ResultVo.success(Code.SUCCESS,"",Map.of("processScore",processScores));
+    }
+    @PutMapping("/processscore/role/{role}") // 打分
+    public ResultVo updateProcessScore(@RequestBody ProcessScore processScore,
+                                       @RequestAttribute("uid") String uid,
+                                       @PathVariable("role") String role) throws JsonProcessingException {
+        String studentId = String.valueOf(processScore.getStudentId());
+        StudentDTO student = new StudentService().getStudent(studentId);
+        Teacher teacher = teacherService.getTeacher(uid);
+        if (student.getGroupId() != teacher.getGroupId()) {
+            return ResultVo.error(Code.ERROR,"不可操作该学生");
+        }
+        if (!role.equals(Process.CHECK)) {
+            return ResultVo.error(Code.UNAUTHORIZED,"无打分权限");
+        }
+        Integer integer = teacherService.updateProcessScore(processScore);
+        if (integer <= 0) {
+            return ResultVo.error(Code.ERROR,"操作失败");
+        }
+        return ResultVo.success(Code.SUCCESS,"打分成功");
     }
 }

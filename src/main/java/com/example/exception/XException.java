@@ -1,12 +1,11 @@
 package com.example.exception;
 
 import lombok.*;
-
-@Getter
-@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
+@Setter
 public class XException extends RuntimeException{
     private Integer code;
     public XException(Integer code,String message) {

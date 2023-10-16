@@ -2,62 +2,60 @@ package com.example.controller;
 
 import com.example.component.JWTComponent;
 import com.example.config.PasswordEncodeConfig;
-import com.example.entity.User;
+import com.example.entity.MyToken;
+import com.example.exception.XException;
+import com.example.pojo.User;
 import com.example.repository.UserRepository;
+import com.example.vo.Code;
 import com.example.vo.ResultVo;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
-
 @RestController
 @RequestMapping("/api")
 public class LoginController {
     @Autowired
-    private PasswordEncodeConfig passwordEncodeConfig;
-    @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private ObjectMapper objectMapper;
+    @Autowired
+    private PasswordEncodeConfig passwordEncodeConfig;
     @Autowired
     private JWTComponent jwtComponent;
     @PostMapping("/login")
-    public ResultVo login(@RequestBody User user, HttpServletResponse response) {
-        User u = userRepository.findByName(user.getName());
-        if (user == null || !passwordEncodeConfig.passwordEncoder().matches(user.getPassword(), u.getPassword())) {
+    public ResultVo login(@RequestBody Map<String,String> map, HttpServletRequest request , HttpServletResponse response) {
+        String number = map.get("number");
+        String password = map.get("password");
+        Integer role = Integer.valueOf(map.get("role"));
+        User user = userRepository.findByNumber(number, role);
+        if (user == null || !passwordEncodeConfig.passwordEncoder().matches(password, user.getPassword())) {
             return ResultVo.builder()
-                    .code(400)
-                    .message("账号或密码错误")
-                    .build();
+                    .code(Code.FAILLOGGIN)
+                    .message("账号或密码错误").build();
         }
-        String code = switch (u.getRole()) {
-            case User.ROLE_STUDENT -> "n28oej2";
-            case User.ROLE_TEACHER -> "io2io72";
-            case User.ROLE_ADMIN -> "ao2pjk4";
-            default -> "";
+        String msg = switch (role) { // 返回给前端信息,就算token令牌被破译了，也不知道是什么意思
+            case 0 -> "dhjndj87d";
+            case 1 -> "64dygcg62";
+            case 2 -> "eyegy632h";
+            default -> " ";
         };
-        //登录成功后信息将会被添加到响应头中，供前端或客服端使用
-        String token = jwtComponent.encode(Map.of("uid",u.getId(),"role",u.getRole()));
-        response.addHeader("role",code);
-        response.addHeader("token",token);
-        if (code.equals("n28oej2")) {
-            return ResultVo.success(Map.of("name", u.getName(),
-                            "role",code,
-                            "SelectTeacher",u.getTeacherName(),
-                    "SelectTime",u.getSelectTime()
-                            ),
-                    "登录成功");
+        MyToken myToken = new MyToken();
+        myToken.setId(user.getId());
+        myToken.setRole(msg);
+        try {
+            String json = objectMapper.writeValueAsString(myToken);
+            Map<String, Object> token = Map.of("token", json);
+            String encode = jwtComponent.encode(token);
+            response.addHeader("token",encode);
+        } catch (JsonProcessingException e) {
+            throw new XException(Code.JSONERROR, "序列化失败");
         }
-        if (code.equals("io2io72")) {
-            return ResultVo.success(Map.of("name", u.getName(),
-                            "role",code,
-                    "SelectedCount",u.getCount()),
-                    "登录成功");
-        }
-        return ResultVo.success(Map.of("name", u.getName(),
-                        "role",code),
-                "登录成功");
+        return ResultVo.success(Code.SUCCESS,"登录成功！",Map.of("user",user));
     }
 }

@@ -2,47 +2,38 @@ package com.example.interceptor;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.example.component.JWTComponent;
+import com.example.entity.MyToken;
 import com.example.exception.XException;
 import com.example.vo.Code;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-import java.util.List;
-
-@Component//拦截之后进行的操作
+@Component
+@Slf4j
 public class LoginInterceptor implements HandlerInterceptor {
     @Autowired
     private JWTComponent jwtComponent;
-    private final List<String> excludes = List.of("/api/login");//放行的请求
-    private final List<String> includes = List.of("/api/");//拦截的请求
+    @Autowired
+    private ObjectMapper objectMapper;
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        String requestPath = request.getRequestURI();//获取请求路径
-        for (String p : includes) {
-            if (requestPath.startsWith(p)) {//如果请求路径是以api开头的
-                boolean shouldContinue = false;
-                for (String s : excludes) {
-                    if (requestPath.startsWith(s)) {//如果请求路径是以api/login开头的
-                        shouldContinue = true;//放行
-                        break;
-                    }
-                }
-                if (!shouldContinue) {//如果是其他路劲，进行token解密
-                    String token = request.getHeader("token");
-                    if (token == null) {
-                        //response.sendRedirect("/api/login");//重定向到登录界面
-                        throw new XException(Code.LOGIN_ERROR,"未登录");
-                    }
-                    DecodedJWT decodedJWT = jwtComponent.decode(token);
-                    request.setAttribute("uid",decodedJWT.getClaim("uid").asLong());
-                    request.setAttribute("role",decodedJWT.getClaim("role").asInt());
-                }
-                break;
-            }
+        String token = response.getHeader("token");
+        System.out.println(token);
+        if (token == null) {
+            response.setStatus(Code.NOT_LOGGIN);
+            throw new XException(Code.NOT_LOGGIN,"未登录，请先登录");
         }
+        DecodedJWT decode = jwtComponent.decode(token);
+        String s = decode.getClaim("token").asString();
+        MyToken myToken = objectMapper.readValue(s, MyToken.class);
+        request.setAttribute("uid",myToken.getId());
+        request.setAttribute("role",myToken.getRole());
+        System.out.println("----------->" + myToken);
         return true;
     }
 }

@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 @Component
-public class AdminInterceptor implements HandlerInterceptor {
+public class TeacherInterception implements HandlerInterceptor {
     @Autowired
     private ObjectMapper objectMapper;
     @Override
@@ -20,9 +20,9 @@ public class AdminInterceptor implements HandlerInterceptor {
         String token = response.getHeader("token");
         MyToken myToken = objectMapper.readValue(token, MyToken.class);
         Integer role = Integer.valueOf(myToken.getRole());
-        if (role.equals(User.ROLE_ADMIN)) {
+        if (role.equals(User.ROLE_TEACHER)) {
             return true;
         }
-        throw new XException(Code.UNAUTHORIZED,"无管理员权限");
+        throw new XException(Code.UNAUTHORIZED,"无教师权限");
     }
 }

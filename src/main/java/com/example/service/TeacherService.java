@@ -1,52 +1,58 @@
 package com.example.service;
 
-import com.example.entity.User;
-import com.example.exception.XException;
-import com.example.repository.UserRepository;
-import com.example.vo.Code;
+import com.example.dto.StudentDTO;
+import com.example.pojo.ProcessScore;
+import com.example.pojo.Student;
+import com.example.pojo.Teacher;
+import com.example.repository.ProcessScoreRepository;
+import com.example.repository.TeacherRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
+@Slf4j
 public class TeacherService {
     @Autowired
-    private UserRepository userRepository;
+    private TeacherRepository teacherRepository;
     @Autowired
-    private PasswordEncoder passwordEncoder;
-    //查找没有选导师的同学列表
-    public List<User> listUnselect() {
-        return userRepository.listUnSelect();
+    private StringRedisTemplate redisTemplate;
+    @Autowired
+    private ObjectMapper objectMapper;
+    public List<Student> getSelectStudents(String id) {
+        List<Student> students = teacherRepository.students1(id);
+        return students;
     }
-    //查找已选某个老师的所有学生
-    public List<User> listSelect(long tid) {
-        List<User> teachers = userRepository.listTeacher();
-        boolean flag = false;
-        User user = userRepository.findById(tid);
-        for (User t : teachers) {
-            if (user == t) {
-                flag = true;
-                break;
-            }
-        }
-        if (!flag) throw new XException(Code.FORBIDDEN,"该用户不属于导师");
-        return userRepository.listSelect(tid);
+    public List<Student> getUnSelect() {
+        List<Student> students = teacherRepository.students2();
+        return students;
     }
-    //查找已配对的老师和同学
-    public List<User> listStudentAndTeacher() {
-        return userRepository.listStudentAndTeacher();
+    public List<StudentDTO> getSelect() {
+        List<StudentDTO> students = teacherRepository.students3();
+        return students;
     }
-    //通过提供姓名和旧密码，更新密码
+    public Teacher getTeacher(String id) {
+        return teacherRepository.findById(id).orElse(null);
+    }
+    @Autowired
+    private ProcessScoreRepository processScoreRepository;
+    public List<ProcessScore> getProcessScores(int groupId, String pid) {
+        return processScoreRepository.getProcessScores(groupId,pid);
+    }
+    public List<ProcessScore> getProcessScores(String tid, String pid) {
+        return processScoreRepository.getProcessScores(tid,pid);
+    }
     @Transactional
-    public boolean updatePassword(String name,String password,String newPassword) {
-        User user = userRepository.findByName(name);
-        if (passwordEncoder.matches(password, user.getPassword())){
-            String temp = passwordEncoder.encode(newPassword);
-            return userRepository.updatePassword(name,temp);
+    public Integer updateProcessScore(ProcessScore processScore) {
+        if (processScore.getId() != null) {
+            return processScoreRepository.updateProcessScore(String.valueOf(processScore.getId()), processScore.getDetail());
         }
-        return false;
+        processScoreRepository.save(processScore);
+        return 1;
     }
 }

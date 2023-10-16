@@ -1,11 +1,11 @@
 package com.example.service;
 
-import com.example.entity.User;
+import com.example.config.PasswordEncodeConfig;
+import com.example.pojo.User;
 import com.example.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,25 +14,20 @@ import java.time.LocalDateTime;
 @Service
 public class InitService {
     @Autowired
-    private PasswordEncoder passwordEncoder;
-    @Autowired
     private UserRepository userRepository;
-    @EventListener(classes = ApplicationReadyEvent.class)//监听事务，当springboot容器刚准备完毕时
+    @Autowired
+    private PasswordEncodeConfig passwordEncodeConfig;
+    @EventListener(classes = ApplicationReadyEvent.class)
     @Transactional
-    public void onApplicationReady() {
-        long count = userRepository.count();
-        String name = "赵光晶";
-        String password = "123456";
-        if (count == 0) {
-            User user = User.builder()
-                    .name(name)
-                    .password(passwordEncoder.encode(password))
-                    .role(User.ROLE_ADMIN)
-                    .number(name)
-                    .description("超级管理员")
-                    .insertTime(LocalDateTime.now())
-                    .build();
-            userRepository.save(user);
+    public void init() {
+        User user = userRepository.findByRole(User.ROLE_ADMIN);
+        if (user == null) {
+            User newUser = new User();
+            newUser.setNumber("0000000000");
+            newUser.setPassword(passwordEncodeConfig.passwordEncoder().encode("0000000000"));
+            newUser.setRole(User.ROLE_ADMIN);
+            newUser.setDescription("超级管理员");
+            userRepository.save(newUser);
         }
     }
 }

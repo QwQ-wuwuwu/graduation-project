@@ -1,27 +1,27 @@
 spring:
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: 'jdbc:mysql://localhost:3306/mybatis?
-    createDataBaseIfNotExist=true
-    &serverTimezone=Asia/Shanghai'
-    username: root
-    password: 532129
+  data:
+    redis:
+      port: 6379
+      host: 10.181.30.10
+      password: 532129
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: 1000ms
+  jackson:
+    default-property-inclusion: non_null
   sql:
     init:
       mode: always
-  jackson:
-    default-property-inclusion: non_null
   jpa:
     show-sql: true
-
+    hibernate:
+      ddl-auto: update
 logging:
   level:
-    sql: debug #控制台输出sql拼接语句
-    root: warn #控制台输出
-    com:
-      example: debug
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n"
+    com.example: debug
 my:
-  secretKey: 2Q1WER5BAQ79PLO0Q
-
+  secretKey: q12w34e56r78
+  upload: 'E:/' #文件上传保存地址

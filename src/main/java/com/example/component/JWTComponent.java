@@ -35,7 +35,7 @@ public class JWTComponent {
                     .build().verify(token);
         }catch (TokenExpiredException | JWTDecodeException | SignatureVerificationException e) {
             String msg = e instanceof TokenExpiredException ? "过期请重新登录" : "无权限";
-            throw new XException(Code.TOKEN_EXPIRED,msg);
+            throw new XException(500,msg);
         }
     }
 }

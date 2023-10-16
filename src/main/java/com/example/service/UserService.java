@@ -1,68 +1,69 @@
 package com.example.service;
 
-import com.example.entity.User;
-import com.example.exception.XException;
+import com.example.config.PasswordEncodeConfig;
+import com.example.pojo.Process;
+import com.example.repository.ProcessRepository;
 import com.example.repository.UserRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class UserService {
     @Autowired
     private UserRepository userRepository;
     @Autowired
-    private PasswordEncoder passwordEncoder;
-    public User findByName(String name) {
-        return userRepository.findByName(name);
-    }
-    //查找所有老师,已选导师的同学无法查找
-    public List<User> listTeacher(long uid,int role) {
-        User user = userRepository.findById(uid);
-        String temp = user.getTeacherName();
-        if (temp != null && role == User.ROLE_STUDENT) {
-            throw new XException(500,"已选导师，不在加载列表");
-        }
-        return userRepository.listTeacher();
-    }
-    //通过提供姓名和旧密码，更新密码
+    private PasswordEncodeConfig passwordEncodeConfig;
+    @Autowired
+    private ProcessRepository processRepository;
     @Transactional
-    public boolean updatePassword(String name,String password,String newPassword) {
-        User user = userRepository.findByName(name);
-        if (passwordEncoder.matches(password, user.getPassword())){
-            String temp = passwordEncoder.encode(newPassword);
-            return userRepository.updatePassword(name,temp);
-        }
-        return false;
+    public Integer updatePassword(String uid, String password) {
+        String encode = passwordEncodeConfig.passwordEncoder().encode(password);
+        Integer integer = userRepository.updatePasswordByUser(uid, encode);
+        return integer;
     }
-    //选择导师
-    @Transactional
-    public boolean selectTeacher(long uid,long tid){
-        if (uid == 0 || tid == 0) {
-            return false;
+    @Autowired
+    private LockService lockService;
+    @Autowired
+    private ObjectMapper objectMapper;
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
+    public List<Process> processList() throws JsonProcessingException {
+        String key = "user:service:processList";
+        String s = stringRedisTemplate.opsForValue().get(key);
+        TypeReference<List<Process>> typeReference = new TypeReference<>() {};
+        if (s != null) {
+            if (s.equals("null")) {
+                return null;
+            }
+            return objectMapper.readValue(s, typeReference);
         }
-        User s = userRepository.findByIdForUpdate(uid);
-        User t = userRepository.findByIdForUpdate(tid);
-        if (s == null || t == null) return false;
-        if (s.getTeacherName() !=null) {
-            throw new XException(500,"已选导师,不可重复选择且不可更改");
+        String lock = "lock:user";
+        List<Process> all = (List<Process>) processRepository.findAll();
+        try {
+            boolean flag = lockService.tryLock(lock);
+            if (!flag) {
+                Thread.sleep(200);
+                return processList();
+            }
+            if (all == null) {
+                stringRedisTemplate.opsForValue().set(key,"随意",5, TimeUnit.MINUTES);
+                return null;
+            }
+            String value = objectMapper.writeValueAsString(all);
+            stringRedisTemplate.opsForValue().set(key,value);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            lockService.unlock(lock);
         }
-        if (t.getTotal() == 0) {
-            throw new XException(500,"导师数量已满");
-        }
-
-        s.setSelectTime(LocalDateTime.now());
-        s.setTeacherId(t.getId());
-        s.setTeacherName(t.getName());
-
-        t.setTotal(t.getTotal() - 1);
-        t.setCount(t.getCount() + 1);
-        userRepository.save(s);
-        userRepository.save(t);
-        return true;
+        return all;
     }
 }

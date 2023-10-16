@@ -12,7 +12,7 @@ import java.util.Enumeration;
 import java.util.Optional;
 
 @Configuration
-@EnableJdbcAuditing
+@EnableJdbcAuditing // 开启审计功能，可以自动为mysql数据表赋值，当然就是id的加密
 public class SnowflakeGenerator {
     @Bean
     AuditorAware<Long> auditorAware() {

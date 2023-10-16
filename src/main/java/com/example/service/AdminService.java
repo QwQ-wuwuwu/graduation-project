@@ -1,10 +1,17 @@
 package com.example.service;
 
-import com.example.entity.StartTime;
-import com.example.entity.User;
+import com.example.config.PasswordEncodeConfig;
+import com.example.entity.StartAndEndTime;
+import com.example.pojo.Process;
+import com.example.pojo.Student;
+import com.example.pojo.Teacher;
+import com.example.pojo.User;
+import com.example.repository.ProcessRepository;
+import com.example.repository.StudentRepository;
+import com.example.repository.TeacherRepository;
 import com.example.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,48 +21,74 @@ import java.util.List;
 @Service
 public class AdminService {
     @Autowired
+    private StartAndEndTime startAndEndTime;
+    public StartAndEndTime time(LocalDateTime start, LocalDateTime end) {
+        this.startAndEndTime.setStart(start);
+        this.startAndEndTime.setEnd(end);
+        return this.startAndEndTime;
+    }
+    @Autowired
     private UserRepository userRepository;
     @Autowired
-    private PasswordEncoder passwordEncoder;
+    private PasswordEncodeConfig passwordEncodeConfig;
+    @Transactional
+    public Integer updatePassword(String number) {
+        String encode = passwordEncodeConfig.passwordEncoder().encode(number);
+        Integer integer = userRepository.updatePassword(number,encode);
+        return integer;
+    }
     @Autowired
-    private StartTime startTime;
-    //设置开始时间
-    public void setTime(LocalDateTime start, LocalDateTime end) {
-        startTime.setStartTime(start);
-        startTime.setEndTime(end);
-    }
-    //添加学生名单(名单只包含姓名)
+    private TeacherRepository teacherRepository;
     @Transactional
-    public boolean addListStudent(List<User> students) {
-        if (students.size() == 0) return false;
-        for (User student : students) {
-            student.setPassword(passwordEncoder.encode(student.getName()));
-            student.setNumber(student.getName());
-            student.setRole(User.ROLE_STUDENT);
-            student.setInsertTime(LocalDateTime.now());
-            userRepository.save(student);
+    public boolean saveTeachers(List<Teacher> teachers) {
+        int number = 0;
+        for (Teacher teacher : teachers) {
+            teacherRepository.save(teacher);
+            String encode = passwordEncodeConfig.passwordEncoder().encode(teacher.getUserNumber());
+            User user = new User();
+            user.setNumber(teacher.getUserNumber());
+            user.setPassword(encode);
+            user.setRole(User.ROLE_TEACHER);
+            user.setDescription("导师");
+            userRepository.save(user);
+            number++;
+        }
+        if (number != teachers.size()) {
+            return false;
         }
         return true;
     }
-    //添加老师名单(名单只包含姓名)
+    @Autowired
+    private StudentRepository studentRepository;
     @Transactional
-    public boolean addListTeacher(List<User> teachers) {
-        if (teachers.size() == 0) return false;
-        for (User teacher : teachers) {
-            teacher.setPassword(passwordEncoder.encode(teacher.getName()));
-            teacher.setNumber(teacher.getName());
-            teacher.setRole(User.ROLE_TEACHER);
-            teacher.setTotal(10);
-            teacher.setCount(0);
-            teacher.setInsertTime(LocalDateTime.now());
-            userRepository.save(teacher);
+    public boolean saveStudents(List<Student> students) {
+        int x = 0;
+        for (Student student : students) {
+            studentRepository.save(student);
+            User user = new User();
+            String encode = passwordEncodeConfig.passwordEncoder().encode(student.getUserNumber());
+            user.setNumber(student.getUserNumber());
+            user.setPassword(encode);
+            user.setRole(User.ROLE_TEACHER);
+            user.setDescription("学生");
+            userRepository.save(user);
+        }
+        if (x != students.size()) {
+            return false;
         }
         return true;
     }
-    //重置所有密码
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
     @Transactional
-    public boolean reSetPassword(String newPassword) {
-        String temp = passwordEncoder.encode(newPassword);
-        return userRepository.reSetPassword(temp);
+    public Integer updateGroup(Integer groupId,String number) {
+        Integer integer = studentRepository.updateGroup(groupId, number);
+        stringRedisTemplate.delete("student:service:getStudent");
+        return integer;
+    }
+    @Autowired
+    private ProcessRepository processRepository;
+    public Process postProcess(Process process) {
+        return processRepository.save(process);
     }
 }
