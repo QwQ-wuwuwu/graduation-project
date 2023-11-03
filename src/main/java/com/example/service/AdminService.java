@@ -1,11 +1,11 @@
 package com.example.service;
 
 import com.example.config.PasswordEncodeConfig;
-import com.example.entity.StartAndEndTime;
-import com.example.pojo.Process;
-import com.example.pojo.Student;
-import com.example.pojo.Teacher;
-import com.example.pojo.User;
+import com.example.pojo.StartAndEndTime;
+import com.example.dox.Process;
+import com.example.dox.Student;
+import com.example.dox.Teacher;
+import com.example.dox.User;
 import com.example.repository.ProcessRepository;
 import com.example.repository.StudentRepository;
 import com.example.repository.TeacherRepository;

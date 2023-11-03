@@ -1,4 +1,4 @@
-package com.example.entity;
+package com.example.pojo;
 
 import lombok.Data;
 import org.springframework.stereotype.Component;

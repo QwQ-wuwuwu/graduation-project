@@ -2,7 +2,7 @@ package com.example.interceptor;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.example.component.JWTComponent;
-import com.example.entity.MyToken;
+import com.example.pojo.MyToken;
 import com.example.exception.XException;
 import com.example.vo.Code;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,8 +22,7 @@ public class LoginInterceptor implements HandlerInterceptor {
     private ObjectMapper objectMapper;
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        String token = response.getHeader("token");
-        System.out.println(token);
+        String token = request.getHeader("token");
         if (token == null) {
             response.setStatus(Code.NOT_LOGGIN);
             throw new XException(Code.NOT_LOGGIN,"未登录，请先登录");
@@ -33,7 +32,6 @@ public class LoginInterceptor implements HandlerInterceptor {
         MyToken myToken = objectMapper.readValue(s, MyToken.class);
         request.setAttribute("uid",myToken.getId());
         request.setAttribute("role",myToken.getRole());
-        System.out.println("----------->" + myToken);
         return true;
     }
 }

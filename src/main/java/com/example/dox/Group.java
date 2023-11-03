@@ -1,4 +1,4 @@
-package com.example.pojo;
+package com.example.dox;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 public class Group {
     @Id
     @CreatedBy
-    private Long id;
+    private String id;
     private Integer groupId;
     private Integer leftCount;
     private String teacher;

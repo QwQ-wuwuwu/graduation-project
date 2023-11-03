@@ -1,15 +1,13 @@
 package com.example.service;
 
 import com.example.config.PasswordEncodeConfig;
-import com.example.pojo.User;
+import com.example.dox.User;
 import com.example.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
 
 @Service
 public class InitService {

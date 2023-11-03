@@ -1,9 +1,11 @@
 package com.example.service;
 
 import com.example.config.PasswordEncodeConfig;
-import com.example.pojo.Process;
+import com.example.exception.XException;
+import com.example.dox.Process;
 import com.example.repository.ProcessRepository;
 import com.example.repository.UserRepository;
+import com.example.vo.Code;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,44 +28,28 @@ public class UserService {
     @Transactional
     public Integer updatePassword(String uid, String password) {
         String encode = passwordEncodeConfig.passwordEncoder().encode(password);
-        Integer integer = userRepository.updatePasswordByUser(uid, encode);
-        return integer;
+        return userRepository.updatePasswordByUser(uid, encode);
     }
-    @Autowired
-    private LockService lockService;
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
-    public List<Process> processList() throws JsonProcessingException {
+    public List<Process> processList() {
         String key = "user:service:processList";
         String s = stringRedisTemplate.opsForValue().get(key);
         TypeReference<List<Process>> typeReference = new TypeReference<>() {};
-        if (s != null) {
-            if (s.equals("null")) {
-                return null;
-            }
-            return objectMapper.readValue(s, typeReference);
-        }
-        String lock = "lock:user";
-        List<Process> all = (List<Process>) processRepository.findAll();
+        String value = null;
+        List<Process> all = null;
         try {
-            boolean flag = lockService.tryLock(lock);
-            if (!flag) {
-                Thread.sleep(200);
-                return processList();
+            if (s != null) {
+                return objectMapper.readValue(s, typeReference);
             }
-            if (all == null) {
-                stringRedisTemplate.opsForValue().set(key,"随意",5, TimeUnit.MINUTES);
-                return null;
-            }
-            String value = objectMapper.writeValueAsString(all);
-            stringRedisTemplate.opsForValue().set(key,value);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } finally {
-            lockService.unlock(lock);
+            all = (List<Process>) processRepository.findAll();
+            value = objectMapper.writeValueAsString(all);
+        } catch (JsonProcessingException e) {
+            throw new XException(Code.JSONERROR,e + "序列化失败");
         }
+        stringRedisTemplate.opsForValue().set(key,value,5,TimeUnit.SECONDS);
         return all;
     }
 }

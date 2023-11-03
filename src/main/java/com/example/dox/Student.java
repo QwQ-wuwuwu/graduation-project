@@ -1,9 +1,10 @@
-package com.example.pojo;
+package com.example.dox;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.data.relational.core.mapping.Table;
@@ -11,21 +12,24 @@ import org.springframework.data.relational.core.mapping.Table;
 import java.time.LocalDateTime;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "project")
-public class ProcessScore {
+@AllArgsConstructor
+@Table(name = "student")
+public class Student {
     @Id
-    private Long id;
+    @CreatedBy
+    private String id;
+    private String sName;
+    @ReadOnlyProperty
     @JsonIgnore
-    private Long studentId;
-    @JsonIgnore
-    private String processId;
-    private String detail;
+    private String teacherId;
+    private  String userNumber;
+    private Integer groupId;
+    private String projectTitle;
     @ReadOnlyProperty
     @JsonIgnore
     private LocalDateTime insertTime;
     @ReadOnlyProperty
     @JsonIgnore
-    private LocalDateTime updateTime;
+    private LocalDateTime selectTime;
 }

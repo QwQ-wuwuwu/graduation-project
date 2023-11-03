@@ -40,3 +40,26 @@ CREATE INDEX idx_group_id ON teacher(group_id);
 explain (
             select distinct group_id from teacher
         );
+explain(
+    select s.s_name, s.user_number as s_number, s.group_id, t.t_name, t.user_number as t_number from
+             teacher t, student s where s.id=1168482466475876400
+             and s.teacher_id=t.id
+);
+update student s set s.teacher_id=1168482466475876352, s.group_id=1 where s.user_number=2021213145;
+select s.s_name, s.user_number as s_number, s.group_id, t.t_name, t.user_number as t_number from
+             teacher t, student s where s.user_number=2021213145
+             and s.teacher_id=t.id;
+explain(
+           select s.user_number from student s,user u where u.id=1168561854001258496 and u.number=s.user_number
+       );
+update teacher t set t.left_select=t.left_select-1 where t.id=1168482466475876352 and t.left_select>0;
+select distinct count(group_id) from teacher
+explain(
+           select f.detail from file f where f.student_number=2021213145 and f.process_id=532129
+       );
+explain (
+            select t.id from user u ,teacher t where u.id=1168482466324881408 and u.number=t.user_number
+         ); # 使用索引了
+explain (
+            select p.items from process p where p.id=1169839316334116864
+        );

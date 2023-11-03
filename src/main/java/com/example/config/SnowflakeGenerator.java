@@ -15,9 +15,9 @@ import java.util.Optional;
 @EnableJdbcAuditing // 开启审计功能，可以自动为mysql数据表赋值，当然就是id的加密
 public class SnowflakeGenerator {
     @Bean
-    AuditorAware<Long> auditorAware() {
+    AuditorAware<String> auditorAware() {
         Snowflake s = new Snowflake();
-        return () -> Optional.of(Long.valueOf(String.valueOf(s.nextId())));
+        return () -> Optional.of(String.valueOf(s.nextId()));
     }
     private static class Snowflake {
         private static final int UNUSED_BITS = 1; // Sign bit, Unused (always set to 0)

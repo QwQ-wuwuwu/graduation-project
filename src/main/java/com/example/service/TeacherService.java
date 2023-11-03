@@ -1,9 +1,9 @@
 package com.example.service;
 
 import com.example.dto.StudentDTO;
-import com.example.pojo.ProcessScore;
-import com.example.pojo.Student;
-import com.example.pojo.Teacher;
+import com.example.dox.ProcessScore;
+import com.example.dox.Student;
+import com.example.dox.Teacher;
 import com.example.repository.ProcessScoreRepository;
 import com.example.repository.TeacherRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,10 +20,9 @@ import java.util.List;
 public class TeacherService {
     @Autowired
     private TeacherRepository teacherRepository;
-    @Autowired
-    private StringRedisTemplate redisTemplate;
-    @Autowired
-    private ObjectMapper objectMapper;
+    public String getTeacherId(String uid) {
+        return teacherRepository.getTeacherId(uid);
+    }
     public List<Student> getSelectStudents(String id) {
         List<Student> students = teacherRepository.students1(id);
         return students;
@@ -54,5 +53,8 @@ public class TeacherService {
         }
         processScoreRepository.save(processScore);
         return 1;
+    }
+    public String getFileDetail(String number,String pid) {
+        return teacherRepository.getFileDetail(number,pid);
     }
 }

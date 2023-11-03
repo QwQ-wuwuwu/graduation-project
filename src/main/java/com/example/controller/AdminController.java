@@ -1,9 +1,9 @@
 package com.example.controller;
 
-import com.example.entity.StartAndEndTime;
-import com.example.pojo.Process;
-import com.example.pojo.Student;
-import com.example.pojo.Teacher;
+import com.example.pojo.StartAndEndTime;
+import com.example.dox.Process;
+import com.example.dox.Student;
+import com.example.dox.Teacher;
 import com.example.service.AdminService;
 import com.example.vo.Code;
 import com.example.vo.ResultVo;
@@ -21,8 +21,8 @@ public class AdminController {
     @Autowired
     private AdminService adminService;
     @PutMapping("/time")
-    public ResultVo time(@RequestParam("start") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime start,
-                         @RequestParam("end") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime end) {
+    public ResultVo time(@RequestParam("start") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm") LocalDateTime start,
+                         @RequestParam("end") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm") LocalDateTime end) {
         StartAndEndTime time = adminService.time(start, end);
         System.out.println(time);
         return ResultVo.success(Code.SUCCESS,"更新成功", Map.of("time",time));

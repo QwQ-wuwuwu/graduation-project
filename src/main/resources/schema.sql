@@ -28,7 +28,7 @@ create table if not exists `student`(
     teacher_id char(19),
     user_number char(10) not null unique,
     group_id int null , /*加入的评审小组*/
-    project_title varchar(50) not null ,
+    project_title varchar(50) not null , /*毕设题目*/
     insert_time datetime not null default CURRENT_TIMESTAMP,
     select_time datetime,
     foreign key(teacher_id) references `teacher`(id),
@@ -38,13 +38,10 @@ create table if not exists `student`(
     );
 create table if not exists `process` ( /*开题答辩/期中检查/毕业答辩/演示四个过程分值比例*/
     id char(19) primary key ,
-    student_detail json null comment '{"name","number"}',
     process_name varchar(50) not null,
     items json null comment '[{"name","number","score","detail"}]',/*打分项目，编号，分值比例，细节描述*/
-    teacher_id char(19) null , /*打分老师或评审*/
     insert_time datetime not null default current_timestamp,
-    update_time datetime not null default current_timestamp on update current_timestamp,
-    INDEX ((CAST(student_detail ->> '$.number' AS CHAR(15))))
+    update_time datetime not null default current_timestamp on update current_timestamp
     );
 create table if not exists `process_score` ( /*过程得分情况*/
     id char(19) primary key,
@@ -60,9 +57,11 @@ create table if not exists `process_score` ( /*过程得分情况*/
     );
 create table if not exists `file` (
     id char(19) primary key ,
-    studentId char(19) not null,
+    student_number char(19) not null,
     detail varchar(100) not null, /*开题或毕设报告*/
     process_id char(19) not null ,/*表明属于哪个过程*/
     insert_time datetime not null default current_timestamp,
-    update_time datetime not null default current_timestamp on update current_timestamp
+    update_time datetime not null default current_timestamp on update current_timestamp,
+    index(student_number),
+    index(process_id)
     );

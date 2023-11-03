@@ -1,12 +1,11 @@
 package com.example;
 
 import com.example.config.PasswordEncodeConfig;
-import com.example.pojo.*;
-import com.example.pojo.Process;
+import com.example.dox.*;
+import com.example.dox.Process;
 import com.example.repository.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mysql.cj.log.Log;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,8 +45,8 @@ class GraduationProjectApplicationTests {
 	private PasswordEncodeConfig passwordEncodeConfig;
 	@Test
 	public void test2() {
-		String number = "2021213145";
-		String name = "赵小晶";
+		String number = "2021213179";
+		String name = "小赵";
 		Student student = new Student();
 		User user = new User();
 		user.setNumber(number);
@@ -57,13 +56,14 @@ class GraduationProjectApplicationTests {
 		userRepository.save(user);
 		student.setUserNumber(number);
 		student.setSName(name);
+		student.setProjectTitle("毕设五");
 		student.setInsertTime(LocalDateTime.now());
 		studentRepository.save(student);
 	}
 	@Test
 	public void test3() {
-		String number = "0000000001";
-		String name = "王波";
+		String number = "0000000004";
+		String name = "王键";
 		Teacher teacher = new Teacher();
 		User user = new User();
 		user.setNumber(number);
@@ -85,7 +85,6 @@ class GraduationProjectApplicationTests {
 		Process process = new Process();
 		process.setItems("[{\"name\": \"打分项一\", \"number\": \"1\", \"score\": 90, \"detail\": \"干得不错\"}]");
 		process.setProcessName("开题");
-		process.setTeacherId(1158269467945410560L);
 		process.setStudentDetail("{\"name\":\"赵小晶\",\"number\":\"2021213145\"}");
 		processRepository.save(process);
 		String json = "[{\"name\"}]";

@@ -1,4 +1,4 @@
-package com.example.pojo;
+package com.example.dox;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -24,7 +24,7 @@ public class User {
     public static final Integer ROLE_ADMIN = 2;
     @Id
     @CreatedBy
-    private Long id; // 主键不适合建立索引，mysql建立时会自动建立主键唯一索引
+    private String id; // 主键不适合建立索引，mysql建立时会自动建立主键唯一索引
     private String number;
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY) // 只许序列化不可以反序列化
     private String password;

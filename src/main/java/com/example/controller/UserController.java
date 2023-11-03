@@ -1,12 +1,10 @@
 package com.example.controller;
 
-import com.example.pojo.Process;
-import com.example.pojo.User;
+import com.example.dox.Process;
+import com.example.dox.User;
 import com.example.service.UserService;
 import com.example.vo.Code;
 import com.example.vo.ResultVo;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,7 +26,7 @@ public class UserController {
         return ResultVo.success(Code.SUCCESS,"更新成功");
     }
     @GetMapping("/process")
-    public ResultVo getProcess() throws JsonProcessingException { // 向所有用户展示过程
+    public ResultVo getProcess() { // 向所有用户展示过程
         List<Process> processes = userService.processList();
         return ResultVo.builder()
                 .code(Code.SUCCESS)

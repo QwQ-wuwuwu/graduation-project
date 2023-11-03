@@ -1,4 +1,5 @@
-package com.example.pojo;
+package com.example.dox;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,19 +12,20 @@ import org.springframework.data.relational.core.mapping.Table;
 import java.time.LocalDateTime;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "teacher")
-public class Teacher {
+@NoArgsConstructor
+@Table(name = "process")
+public class Process {
+    public static final String CHECK = "qwq"; // 审查人员
+    public static final String TEACHER = "QWQ";  // 指导老师
     @Id
     @CreatedBy
-    private Long id;
-    private String tName;
-    private String userNumber;
-    private Integer total;
-    private Integer leftSelect;
-    private Integer groupId;
-    private Integer groupCount;
+    private String id;
+    private String studentDetail;
+    private String processName;
+    private String items;
+    @JsonIgnore
+    private String teacherId;
     @ReadOnlyProperty
     @JsonIgnore
     private LocalDateTime insertTime;

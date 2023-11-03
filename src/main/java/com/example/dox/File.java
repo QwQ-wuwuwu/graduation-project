@@ -1,4 +1,4 @@
-package com.example.pojo;
+package com.example.dox;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
@@ -18,10 +18,10 @@ import java.time.LocalDateTime;
 public class File {
     @Id
     @CreatedBy
-    private Long id;
-    private Long studentId;
+    private String id;
+    private String studentNumber;
     private String detail;
-    private Long processId;
+    private String processId;
     @ReadOnlyProperty
     @JsonIgnore
     private LocalDateTime insertTime;

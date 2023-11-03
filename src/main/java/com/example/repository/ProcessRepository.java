@@ -1,10 +1,12 @@
 package com.example.repository;
 
-import com.example.pojo.Process;
+import com.example.dox.Process;
 import org.springframework.data.jdbc.repository.query.Modifying;
 import org.springframework.data.jdbc.repository.query.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
+
+import java.util.List;
 
 public interface ProcessRepository extends CrudRepository<Process, Long> {
     @Modifying
@@ -13,4 +15,6 @@ public interface ProcessRepository extends CrudRepository<Process, Long> {
     void saveProcessJson(@Param("id") String id, @Param("processName") String processName, @Param("sName") String sName,
                          @Param("sNumber") String sNumber, @Param("teacherId") String teacherId,
                          @Param("items") String items);
+    @Query("select * from process p where p.student_detail->>'$.number'=:number")
+    List<Process> getProcess(@Param("number") String number);
 }

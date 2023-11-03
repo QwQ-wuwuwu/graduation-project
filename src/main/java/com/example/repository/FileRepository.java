@@ -1,6 +1,6 @@
 package com.example.repository;
 
-import com.example.pojo.File;
+import com.example.dox.File;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
