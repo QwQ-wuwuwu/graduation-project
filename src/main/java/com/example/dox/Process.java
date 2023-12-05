@@ -21,11 +21,8 @@ public class Process {
     @Id
     @CreatedBy
     private String id;
-    private String studentDetail;
     private String processName;
     private String items;
-    @JsonIgnore
-    private String teacherId;
     @ReadOnlyProperty
     @JsonIgnore
     private LocalDateTime insertTime;

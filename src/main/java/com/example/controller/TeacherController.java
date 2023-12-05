@@ -104,7 +104,13 @@ public class TeacherController {
             }
         }catch (IOException e) {
             e.printStackTrace();
+            return ResultVo.error(Code.ERROR,"下载失败");
         }
         return null; // 已经将文件以二进制形式响应了，导致resultvo无法正常转换为json
+    }
+    @GetMapping("/process")
+    public ResultVo getProcess() {
+        List<Process> processes = teacherService.getProcesses();
+        return ResultVo.success(Code.SUCCESS,"",Map.of("processes",processes));
     }
 }

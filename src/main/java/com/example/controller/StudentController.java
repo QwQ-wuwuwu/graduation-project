@@ -89,4 +89,12 @@ public class StudentController {
             }
         }
     }
+    @GetMapping("/process")
+    public ResultVo getProcess() {
+        return ResultVo.builder()
+                .code(Code.SUCCESS)
+                .message("")
+                .data(Map.of("processes",studentService.getAllProcess()))
+                .build();
+    }
 }

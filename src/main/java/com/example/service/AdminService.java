@@ -11,7 +11,6 @@ import com.example.repository.StudentRepository;
 import com.example.repository.TeacherRepository;
 import com.example.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -78,12 +77,9 @@ public class AdminService {
         }
         return true;
     }
-    @Autowired
-    private StringRedisTemplate stringRedisTemplate;
     @Transactional
     public Integer updateGroup(Integer groupId,String number) {
         Integer integer = studentRepository.updateGroup(groupId, number);
-        stringRedisTemplate.delete("student:service:getStudent");
         return integer;
     }
     @Autowired

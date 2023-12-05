@@ -1,15 +1,9 @@
 spring:
-  data:
-    redis:
-      port: 6379
-      host: 10.181.30.10
-      password: 532129
-      lettuce:
-        pool:
-          max-active: 8
-          max-idle: 8
-          min-idle: 0
-          max-wait: 1000ms
+  datasource:
+    password: 532129
+    url: jdbc:mysql://localhost:3306/project?createDataBaseIfNotExist=true&serverTimezone=Asia/Shanghai
+    username: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
   jackson:
     default-property-inclusion: non_null
   sql:

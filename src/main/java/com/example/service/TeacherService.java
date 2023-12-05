@@ -1,15 +1,14 @@
 package com.example.service;
 
+import com.example.dox.Process;
 import com.example.dto.StudentDTO;
 import com.example.dox.ProcessScore;
 import com.example.dox.Student;
 import com.example.dox.Teacher;
 import com.example.repository.ProcessScoreRepository;
 import com.example.repository.TeacherRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,5 +55,8 @@ public class TeacherService {
     }
     public String getFileDetail(String number,String pid) {
         return teacherRepository.getFileDetail(number,pid);
+    }
+    public List<Process> getProcesses() {
+        return teacherRepository.getProcesses();
     }
 }

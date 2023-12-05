@@ -7,7 +7,6 @@ import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.example.exception.XException;
-import com.example.vo.Code;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 

@@ -10,7 +10,6 @@ import org.springframework.data.jdbc.repository.config.EnableJdbcRepositories;
 import java.text.SimpleDateFormat;
 
 @SpringBootApplication
-@EnableAspectJAutoProxy//扫描自定义切面（aop）
 @EnableJdbcRepositories(basePackages = "com.example.repository")
 public class GraduationProjectApplication {
 	public static void main(String[] args) {

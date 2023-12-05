@@ -1,5 +1,6 @@
 package com.example.repository;
 
+import com.example.dox.Process;
 import com.example.dto.StudentDTO;
 import com.example.dox.Student;
 import com.example.dox.Teacher;
@@ -24,4 +25,6 @@ public interface TeacherRepository extends CrudRepository<Teacher, String> {
     String getFileDetail(@Param("number") String number,@Param("pid") String pid);
     @Query("select t.id from user u ,teacher t where u.id=:uid and u.number=t.user_number")
     String getTeacherId(@Param("uid") String uid);
+    @Query("select p.id, p.process_name from process p")
+    List<Process> getProcesses();
 }

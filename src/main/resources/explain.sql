@@ -63,3 +63,5 @@ explain (
 explain (
             select p.items from process p where p.id=1169839316334116864
         );
+select p.id, p.process_name from process p;
+select * from process p;

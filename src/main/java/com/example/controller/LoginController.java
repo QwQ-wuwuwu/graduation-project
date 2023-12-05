@@ -45,7 +45,6 @@ public class LoginController {
             String json = objectMapper.writeValueAsString(myToken);
             Map<String, Object> token = Map.of("token", json);
             String encode = jwtComponent.encode(token);
-            System.out.println(encode);
             // 设置响应头，以暴露自定义响应头字段,很重要，否则前端axios无法获取token
             response.addHeader("Access-Control-Expose-Headers", "Token");
             // 设置自定义响应头字段

@@ -17,4 +17,6 @@ public interface ProcessRepository extends CrudRepository<Process, Long> {
                          @Param("items") String items);
     @Query("select * from process p where p.student_detail->>'$.number'=:number")
     List<Process> getProcess(@Param("number") String number);
+    @Query("select * from process p")
+    List<Process> getAllProcess();
 }
