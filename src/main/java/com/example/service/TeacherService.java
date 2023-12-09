@@ -59,4 +59,14 @@ public class TeacherService {
     public List<Process> getProcesses() {
         return teacherRepository.getProcesses();
     }
+    public List<Student> getStudentByGroup(String uid) {
+        int groupId = teacherRepository.teacherGroupId(uid);
+        return teacherRepository.getStudentByGroup(groupId);
+    }
+    public Process getProcessById(String pid) {
+        return teacherRepository.getProcessById(pid);
+    }
+    public String getTeacherName(String uid) {
+        return teacherRepository.getTeacherName(uid);
+    }
 }

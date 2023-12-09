@@ -16,10 +16,9 @@ import java.util.Map;
 public class UserController {
     @Autowired
     private UserService userService;
-    @PutMapping("/password")
-    public ResultVo updatePassword(@RequestBody User user, @RequestAttribute("uid") String uid) {
-        String password = user.getPassword();
-        Integer integer = userService.updatePassword(uid, password);
+    @PutMapping("/password/{newPassword}")
+    public ResultVo updatePassword(@PathVariable("newPassword") String newPassword, @RequestAttribute("uid") String uid) {
+        Integer integer = userService.updatePassword(uid, newPassword);
         if (integer < 0) {
             return ResultVo.error(Code.ERROR,"更新失败");
         }

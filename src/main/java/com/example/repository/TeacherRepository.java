@@ -25,6 +25,14 @@ public interface TeacherRepository extends CrudRepository<Teacher, String> {
     String getFileDetail(@Param("number") String number,@Param("pid") String pid);
     @Query("select t.id from user u ,teacher t where u.id=:uid and u.number=t.user_number")
     String getTeacherId(@Param("uid") String uid);
-    @Query("select p.id, p.process_name from process p")
+    @Query("select t.t_name from user u, teacher t where u.id=:uid and u.number=t.user_number")
+    String getTeacherName(@Param("uid") String uid);
+    @Query("select p.id, p.process_name,p.items from process p")
     List<Process> getProcesses();
+    @Query("select s.user_number,s.s_name,s.project_title from student s where s.group_id=:groupId")
+    List<Student> getStudentByGroup(@Param("groupId") int groupId);
+    @Query("select t.group_id from user u, teacher t where u.id=:uid and u.number=t.user_number")
+    int teacherGroupId(@Param("uid") String uid);
+    @Query("select p.process_name,p.items from process p where p.id=:pid")
+    Process getProcessById(@Param("pid") String pid);
 }

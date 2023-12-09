@@ -65,3 +65,8 @@ explain (
         );
 select p.id, p.process_name from process p;
 select * from process p;
+select t.group_id from user u, teacher t where u.id=1168482466324881408 and u.number=t.user_number;
+explain (
+            select p.process_name,p.items from process p where p.id=1181891199759360000
+        );
+explain (select t.t_name from user u, teacher t where u.id=1168482466324881408 and u.number=t.user_number)

@@ -5,6 +5,7 @@ import com.example.dox.Process;
 import com.example.dox.ProcessScore;
 import com.example.dox.Student;
 import com.example.dox.Teacher;
+import com.example.repository.TeacherRepository;
 import com.example.service.StudentService;
 import com.example.service.TeacherService;
 import com.example.vo.Code;
@@ -48,28 +49,28 @@ public class TeacherController {
         }
         return ResultVo.success(Code.SUCCESS,"操作成功",Map.of("students",unSelect));
     }
-    @GetMapping("/students3")
-    public ResultVo getSelect() { // 查看所有已选学生
-        List<StudentDTO> select = teacherService.getSelect();
-        if (select == null) {
-            return ResultVo.error(Code.ERROR,"操作失败");
-        }
-        if (select.size() == 0) {
-            return ResultVo.success(Code.SUCCESS,"没有同学已选导师");
-        }
-        return ResultVo.success(Code.SUCCESS,"操作成功",Map.of("students",select));
+    @GetMapping("/group")
+    public ResultVo listGroupStudent(@RequestAttribute("uid") String uid) {
+        return ResultVo.builder()
+                .code(Code.SUCCESS)
+                .message("")
+                .data(Map.of("students",teacherService.getStudentByGroup(uid)))
+                .build();
     }
-    @GetMapping("/process/{pid}/role/{role}")
-    public ResultVo listProcess(@PathVariable("pid") String pid, @PathVariable String role,
-                                @RequestAttribute("uid") String uid) {
-        Teacher teacher = teacherService.getTeacher(uid);
-        Integer groupId = teacher.getGroupId(); // 老师所在的评审小组就是学生加入的评审小组
-        if (role.equals(Process.CHECK)) { // 如果是审查老师，应该展示这个组的所有同学的过程分数
-            List<ProcessScore> processScores = teacherService.getProcessScores(groupId, pid);
-            return ResultVo.success(Code.SUCCESS,"",Map.of("processScore",processScores));
-        }
-        List<ProcessScore> processScores = teacherService.getProcessScores(uid, pid);
-        return ResultVo.success(Code.SUCCESS,"",Map.of("processScore",processScores));
+    @GetMapping("/process/{pid}")
+    public ResultVo getProcessById(@PathVariable("pid") String pid) {
+        return ResultVo.builder()
+                .code(Code.SUCCESS)
+                .message("操作成功")
+                .data(Map.of("process", teacherService.getProcessById(pid)))
+                .build();
+    }
+    @GetMapping("/name")
+    public ResultVo getTeacherName(@RequestAttribute("uid") String uid) {
+        return ResultVo.builder()
+                .code(Code.SUCCESS)
+                .message("")
+                .data(Map.of("teacherName",teacherService.getTeacherName(uid))).build();
     }
     @PutMapping("/processscore/role/{role}") // 打分
     public ResultVo updateProcessScore(@RequestBody ProcessScore processScore,
